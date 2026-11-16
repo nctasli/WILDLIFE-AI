@@ -1,0 +1,4 @@
+# Install in a separate virtual environment: SpeciesNet's dependencies are
+# large and include versions that may conflict with the YOLO development env.
+-r requirements.txt
+speciesnet>=5.0,<6.0

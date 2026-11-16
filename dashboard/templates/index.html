@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark">
+    <title>WILDLIFE-AI | Kontrol Paneli</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
+    <script src="{{ url_for('static', filename='dashboard.js') }}" defer></script>
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">W</div>
+          <div>
+            <p class="eyebrow">YABAN HAYATI GÖZLEM SİSTEMİ</p>
+            <h1>WILDLIFE<span>-AI</span></h1>
+          </div>
+        </div>
+        <div class="system-pill" id="system-pill" role="status" aria-live="polite">
+          <span class="status-dot" aria-hidden="true"></span>
+          <span id="system-state">Başlatılmadı</span>
+        </div>
+      </header>
+
+      <section class="summary-grid" aria-label="Sistem özeti">
+        <article class="summary-card">
+          <span class="card-label">KAMERA</span>
+          <strong id="camera-state">Bağlı değil</strong>
+          <span class="card-foot" id="camera-source">Kaynak: —</span>
+        </article>
+        <article class="summary-card">
+          <span class="card-label">YAPAY ZEKÂ</span>
+          <strong id="detector-state">Beklemede</strong>
+          <span class="card-foot" id="detector-name">Model: —</span>
+        </article>
+        <article class="summary-card">
+          <span class="card-label">CAYDIRMA</span>
+          <strong id="deterrence-state">Pasif</strong>
+          <span class="card-foot">Otomatik ses kontrolü</span>
+        </article>
+        <article class="summary-card">
+          <span class="card-label">COOLDOWN</span>
+          <strong id="cooldown-state">Hazır</strong>
+          <span class="card-foot" id="cooldown-note">Ses tetiklenmesi bekleniyor</span>
+        </article>
+      </section>
+
+      <section class="workspace-grid">
+        <article class="panel camera-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">CANLI GÖRÜNTÜ</p>
+              <h2>Kamera akışı</h2>
+            </div>
+            <span class="live-label"><span class="status-dot"></span> CANLI</span>
+          </div>
+          <div class="video-stage">
+            <img id="live-video" src="{{ url_for('video_feed') }}" alt="Algılama kutuları eklenmiş canlı kamera görüntüsü">
+            <div class="video-placeholder" id="video-placeholder" role="status">
+              <span class="camera-glyph" aria-hidden="true">◉</span>
+              <strong>Kamera akışı beklemede</strong>
+              <span>Sistemi başlatınca görüntü burada görünür.</span>
+            </div>
+          </div>
+          <div class="camera-caption">
+            <span>Görüntü yerel olarak işlenir</span>
+            <span id="frame-caption">Akış durduruldu</span>
+          </div>
+        </article>
+
+        <aside class="panel control-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">SİSTEM KONTROLÜ</p>
+              <h2>İşlemler</h2>
+            </div>
+          </div>
+          <div class="button-stack">
+            <button class="button button-primary" id="start-button" type="button">Sistemi başlat</button>
+            <button class="button button-secondary" id="stop-button" type="button">Sistemi durdur</button>
+            <button class="button button-danger" id="emergency-button" type="button">Acil durdurma</button>
+          </div>
+          <div class="control-divider"></div>
+          <button class="button button-toggle" id="deterrence-button" type="button" aria-pressed="false" disabled>
+            Caydırmayı etkinleştir
+          </button>
+          <button class="button button-secondary" id="sound-button" type="button">Uyarı sesini test et</button>
+          <p class="safety-note">Otomatik caydırma varsayılan olarak kapalıdır. İnsan ve hedef dışı tespitler ses tetiklemez.</p>
+          <p class="action-message" id="action-message" role="status" aria-live="polite"></p>
+        </aside>
+      </section>
+
+      <section class="panel history-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">SQLITE KAYITLARI</p>
+            <h2>Tespit geçmişi</h2>
+          </div>
+          <button class="button button-quiet" id="refresh-button" type="button">Yenile</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Tarih / saat</th>
+                <th scope="col">Sınıf</th>
+                <th scope="col">Güven</th>
+                <th scope="col">Hedef</th>
+                <th scope="col">Ses sonucu</th>
+                <th scope="col">Görüntü</th>
+              </tr>
+            </thead>
+            <tbody id="events-body">
+              <tr><td class="empty-state" colspan="6">Henüz olay kaydı yok.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <footer class="footer">
+        <span>WILDLIFE-AI</span>
+        <span id="last-updated">Durum bekleniyor</span>
+      </footer>
+    </main>
+  </body>
+</html>

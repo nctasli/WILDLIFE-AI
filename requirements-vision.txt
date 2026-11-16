@@ -1,0 +1,4 @@
+# Install when beginning the YOLO detection stage. PyTorch wheels and
+# acceleration support vary by Python version and hardware platform.
+ultralytics>=8.3,<9.0
+
