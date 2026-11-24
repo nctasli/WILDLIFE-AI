@@ -93,11 +93,13 @@ def create_app(
     @dashboard.get("/video_feed")
     def video_feed() -> Response:
         def generate():
+            last_frame_bytes = None
             while True:
                 frame = service.latest_frame
-                if frame is None:
-                    time.sleep(0.25)
+                if frame is None or frame is last_frame_bytes:
+                    time.sleep(0.01)
                     continue
+                last_frame_bytes = frame
                 yield (
                     b"--frame\r\n"
                     b"Content-Type: image/jpeg\r\n"
@@ -105,7 +107,6 @@ def create_app(
                     + frame
                     + b"\r\n"
                 )
-                time.sleep(1.0 / config.DASHBOARD_STREAM_FPS)
 
         return Response(
             stream_with_context(generate()),

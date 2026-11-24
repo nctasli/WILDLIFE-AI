@@ -24,5 +24,16 @@ class WebcamCamera(BaseCamera):
         return self.device_index
 
     def _configure_capture(self, capture: cv2.VideoCapture) -> None:
+        # Logitech ve USB kameralar için donanımsal MJPEG modu (USB 2.0 darboğazını ve kasmayı çözer)
+        try:
+            capture.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*"MJPG"))
+        except Exception:
+            pass
         capture.set(cv2.CAP_PROP_FRAME_WIDTH, config.CAMERA_WIDTH)
         capture.set(cv2.CAP_PROP_FRAME_HEIGHT, config.CAMERA_HEIGHT)
+        capture.set(cv2.CAP_PROP_FPS, 30)
+        # Gecikmeyi sıfırlamak için iç tamponu (buffer) 1 kareye sınırla
+        try:
+            capture.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+        except Exception:
+            pass

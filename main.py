@@ -77,6 +77,7 @@ def run_preview(
         raise ValueError("analysis_every must be greater than zero.")
 
     frame_count = 0
+    current_detections: list[Detection] = []
     if not camera.open():
         logger.warning("Camera is not available yet; waiting for connection.")
 
@@ -98,58 +99,59 @@ def run_preview(
                 frame, _, _ = enhancer.enhance(frame)
 
             frame_count += 1
-            if detector is not None and (frame_count - 1) % analysis_every == 0:
-                detections = detector.detect(frame)
-                if tracker is not None:
-                    detections = tracker.update(detections)
-                frame = detector.annotate(frame, detections)
-                for detection in detections:
-                    snapshot_path: Path | None = None
-                    if (
-                        database is not None
-                        and detection.newly_confirmed
-                        and detection.target_confirmed
-                    ):
-                        try:
-                            snapshot_path = database.save_snapshot(detection, frame)
-                        except (OSError, RuntimeError, ValueError):
-                            logging.getLogger("database.snapshots").exception(
-                                "Snapshot capture failed for event %s",
-                                detection.event_id,
-                            )
+            if detector is not None:
+                if (frame_count - 1) % analysis_every == 0:
+                    current_detections = detector.detect(frame)
+                    if tracker is not None:
+                        current_detections = tracker.update(current_detections)
+                    for detection in current_detections:
+                        snapshot_path: Path | None = None
+                        if (
+                            database is not None
+                            and detection.newly_confirmed
+                            and detection.target_confirmed
+                        ):
+                            try:
+                                snapshot_path = database.save_snapshot(detection, frame)
+                            except (OSError, RuntimeError, ValueError):
+                                logging.getLogger("database.snapshots").exception(
+                                    "Snapshot capture failed for event %s",
+                                    detection.event_id,
+                                )
 
-                    trigger_result = None
-                    logger.info(
-                        "Detected %s (%.2f) at %s, track=%s, target=%s (%d/%d), "
-                        "movement=%s%s",
-                        detection.class_name,
-                        detection.confidence,
-                        detection.coordinates,
-                        detection.track_id,
-                        detection.target_confirmed,
-                        detection.target_progress,
-                        config.CONSECUTIVE_CONFIRMATION_FRAMES,
-                        detection.track_state,
-                        " [NEWLY CONFIRMED]" if detection.newly_confirmed else "",
-                    )
-                    if trigger is not None:
-                        trigger_result = trigger.evaluate(detection)
-                        if trigger_result is not None:
-                            logger.info(
-                                "Deterrence result: event=%s species=%s triggered=%s "
-                                "reason=%s cooldown=%.1fs",
-                                trigger_result.event_id,
-                                trigger_result.species,
-                                trigger_result.triggered,
-                                trigger_result.reason,
-                                trigger_result.cooldown_remaining_seconds,
-                            )
-                    if database is not None:
-                        database.record_detection(
-                            detection,
-                            snapshot_path=snapshot_path,
-                            trigger_result=trigger_result,
+                        trigger_result = None
+                        logger.info(
+                            "Detected %s (%.2f) at %s, track=%s, target=%s (%d/%d), "
+                            "movement=%s%s",
+                            detection.class_name,
+                            detection.confidence,
+                            detection.coordinates,
+                            detection.track_id,
+                            detection.target_confirmed,
+                            detection.target_progress,
+                            config.CONSECUTIVE_CONFIRMATION_FRAMES,
+                            detection.track_state,
+                            " [NEWLY CONFIRMED]" if detection.newly_confirmed else "",
                         )
+                        if trigger is not None:
+                            trigger_result = trigger.evaluate(detection)
+                            if trigger_result is not None:
+                                logger.info(
+                                    "Deterrence result: event=%s species=%s triggered=%s "
+                                    "reason=%s cooldown=%.1fs",
+                                    trigger_result.event_id,
+                                    trigger_result.species,
+                                    trigger_result.triggered,
+                                    trigger_result.reason,
+                                    trigger_result.cooldown_remaining_seconds,
+                                )
+                        if database is not None:
+                            database.record_detection(
+                                detection,
+                                snapshot_path=snapshot_path,
+                                trigger_result=trigger_result,
+                            )
+                frame = detector.annotate(frame, current_detections)
             if frame_callback is not None:
                 frame_callback(frame)
             if display:
@@ -175,7 +177,7 @@ def _parse_args(arguments: Sequence[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Preview a WILDLIFE-AI camera source.")
     parser.add_argument(
         "--source",
-        choices=("webcam", "video", "esp32"),
+        choices=("webcam", "video", "esp32", "rtsp", "tapo"),
         default=config.CAMERA_SOURCE,
         help="Camera source (default: config.CAMERA_SOURCE).",
     )
@@ -187,6 +189,7 @@ def _parse_args(arguments: Sequence[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument("--webcam-index", type=int, default=None)
     parser.add_argument("--esp32-url", default=None, help="ESP32 HTTP/MJPEG stream URL.")
+    parser.add_argument("--rtsp-url", default=None, help="RTSP / Tapo stream URL.")
     parser.add_argument(
         "--detect",
         action="store_true",
@@ -268,6 +271,7 @@ def main(arguments: Sequence[str] | None = None) -> int:
         video_path=args.video,
         webcam_index=args.webcam_index,
         esp32_stream_url=args.esp32_url,
+        rtsp_stream_url=args.rtsp_url,
     )
     detector: FrameDetector | None = None
     if args.detect and args.detector == "yolo":

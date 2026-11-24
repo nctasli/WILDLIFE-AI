@@ -5,7 +5,7 @@ import threading
 import numpy as np
 import pytest
 
-from camera import ESP32Camera, VideoFileCamera, WebcamCamera, create_camera
+from camera import ESP32Camera, RTSPCamera, VideoFileCamera, WebcamCamera, create_camera
 from camera import base_camera
 from detection.animal_detector import Detection
 from main import run_preview
@@ -39,6 +39,8 @@ def test_factory_creates_configured_source_types() -> None:
     assert isinstance(create_camera("webcam", webcam_index=2), WebcamCamera)
     assert isinstance(create_camera("video", video_path="clip.mp4"), VideoFileCamera)
     assert isinstance(create_camera("esp32", esp32_stream_url="http://camera/stream"), ESP32Camera)
+    assert isinstance(create_camera("rtsp", rtsp_stream_url="rtsp://camera/stream2"), RTSPCamera)
+    assert isinstance(create_camera("tapo", rtsp_stream_url="rtsp://camera/stream2"), RTSPCamera)
 
 
 def test_factory_rejects_unknown_source() -> None:

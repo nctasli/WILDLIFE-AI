@@ -73,6 +73,7 @@ class DashboardController:
             video_path=config.VIDEO_PATH,
             webcam_index=config.WEBCAM_INDEX,
             esp32_stream_url=config.ESP32_STREAM_URL,
+            rtsp_stream_url=config.RTSP_STREAM_URL,
         )
 
     @staticmethod
@@ -276,7 +277,12 @@ class DashboardController:
                 return
             self._last_encoded_at = now
 
-        success, encoded = cv2.imencode(".jpg", frame)
+        jpeg_quality = getattr(config, "DASHBOARD_JPEG_QUALITY", 70)
+        success, encoded = cv2.imencode(
+            ".jpg",
+            frame,
+            [int(cv2.IMWRITE_JPEG_QUALITY), int(jpeg_quality)],
+        )
         if not success:
             raise RuntimeError("Could not encode the dashboard camera frame.")
         with self._lock:

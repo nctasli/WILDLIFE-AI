@@ -4,12 +4,20 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent
 
-# Select "webcam", "video", or "esp32".
+# Select "webcam", "video", "esp32", or "rtsp" (Tapo / IP camera).
 CAMERA_SOURCE: str = "webcam"
 WEBCAM_INDEX: int = 0
 VIDEO_PATH: Path = BASE_DIR / "samples" / "wildlife.mp4"
 ESP32_CAMERA_IP: str = "192.168.1.50"
 ESP32_STREAM_URL: str = f"http://{ESP32_CAMERA_IP}:81/stream"
+
+# TP-Link Tapo / RTSP IP kamera yapılandırması:
+# Tapo Uygulaması -> Kamera Ayarları -> Gelişmiş Ayarlar -> Kamera Hesabı (kullanıcı adı ve şifre)
+# Yüksek Çözünürlük: stream1, Düşük Çözünürlük/Hızlı Akış: stream2 (RPi için stream2 önerilir)
+RTSP_CAMERA_USER: str = "admin"
+RTSP_CAMERA_PASSWORD: str = "admin123"
+RTSP_CAMERA_IP: str = "192.168.1.100"
+RTSP_STREAM_URL: str = f"rtsp://{RTSP_CAMERA_USER}:{RTSP_CAMERA_PASSWORD}@{RTSP_CAMERA_IP}:554/stream2"
 CAMERA_RECONNECT_SECONDS: float = 3.0
 CAMERA_WIDTH: int = 640
 CAMERA_HEIGHT: int = 480
@@ -68,5 +76,6 @@ NIGHT_MODE_DRAW_INDICATOR: bool = True
 DASHBOARD_HOST: str = "127.0.0.1"
 DASHBOARD_PORT: int = 5000
 DASHBOARD_DETECTOR: str = "yolo"
-DASHBOARD_ANALYSIS_EVERY: int = 1
-DASHBOARD_STREAM_FPS: int = 5
+DASHBOARD_ANALYSIS_EVERY: int = 3   # Akıcı yayın için her 3 karede 1 analiz (RPi CPU'sunu rahatlatır)
+DASHBOARD_STREAM_FPS: int = 15      # Canlı yayın saniyedeki kare hızı (5'ten 15'e çıkarıldı)
+DASHBOARD_JPEG_QUALITY: int = 70    # Hızlı aktarım ve düşük gecikme için optimize JPEG kalitesi
