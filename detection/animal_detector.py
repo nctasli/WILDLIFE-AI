@@ -74,8 +74,9 @@ class AnimalDetector:
             from ultralytics import YOLO
         except ImportError as exc:
             raise RuntimeError(
-                "YOLO dependency is missing. Install it with "
-                "'python -m pip install -r requirements-vision.txt'."
+                f"YOLO dependency is missing or failed to import ({exc}). "
+                "Ensure your virtual environment is active (source .venv/bin/activate) "
+                "and install dependencies with 'pip install -r requirements-rpi.txt'."
             ) from exc
 
         try:

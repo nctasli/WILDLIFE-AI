@@ -1,0 +1,20 @@
+# WILDLIFE-AI: Raspberry Pi 4 (ARM64) Hafif Dağıtım Gereksinimleri
+# PyTorch'un gigabaytlarca ağırlığı olmadan, optimize edilmiş ONNX ve NCNN ile çalışır.
+
+# Web Dashboard
+flask>=3.0,<4.0
+
+# OpenCV (Monitörsüz / Headless Linux için optimize edilmiş)
+opencv-python-headless>=4.8,<5.0
+
+# Çıkarım Motoru (ARM64 CPU için yüksek hızlı ONNX Runtime)
+onnxruntime>=1.18.0
+
+# YOLO Çıkarım Arayüzü
+ultralytics>=8.3,<9.0
+
+# Sesli Caydırma Motoru
+pygame>=2.5,<3.0
+
+# Çekirdek Kütüphaneler
+numpy>=1.26.0,<3.0

@@ -12,7 +12,7 @@ import cv2
 import numpy as np
 
 import config
-from camera import create_camera
+from camera import NightModeEnhancer, create_camera
 from database import WildlifeDatabase
 from detection import AnimalDetector
 from detection.base_detector import FrameDetector
@@ -248,6 +248,7 @@ class DashboardController:
                 database=self.database,
                 stop_event=stop_event,
                 frame_callback=self._publish_frame,
+                enhancer=NightModeEnhancer(),
             )
         except Exception as exc:
             logger.exception("Dashboard monitoring worker failed.")

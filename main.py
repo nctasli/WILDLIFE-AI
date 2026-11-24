@@ -14,7 +14,7 @@ import cv2
 import numpy as np
 
 import config
-from camera import create_camera
+from camera import NightModeEnhancer, create_camera
 from database import WildlifeDatabase
 from detection import AnimalDetector
 from detection.base_detector import FrameDetector
@@ -70,6 +70,7 @@ def run_preview(
     database: WildlifeDatabase | None = None,
     stop_event: threading.Event | None = None,
     frame_callback: Callable[[np.ndarray], None] | None = None,
+    enhancer: NightModeEnhancer | None = None,
 ) -> int:
     """Preview camera frames, optionally detecting and drawing model results."""
     if analysis_every <= 0:
@@ -92,6 +93,9 @@ def run_preview(
                 else:
                     time.sleep(min(config.CAMERA_PREVIEW_WAIT_MS / 1000, 0.1))
                 continue
+
+            if enhancer is not None:
+                frame, _, _ = enhancer.enhance(frame)
 
             frame_count += 1
             if detector is not None and (frame_count - 1) % analysis_every == 0:
@@ -233,6 +237,12 @@ def _parse_args(arguments: Sequence[str] | None = None) -> argparse.Namespace:
         default=config.DEFAULT_SOUND_PATH,
         help="Audio file for --test-sound (default: config.DEFAULT_SOUND_PATH).",
     )
+    parser.add_argument(
+        "--night-mode",
+        choices=("auto", "on", "off"),
+        default="auto",
+        help="Night mode / low-light contrast enhancement with CLAHE (default: auto).",
+    )
     return parser.parse_args(arguments)
 
 
@@ -276,6 +286,14 @@ def main(arguments: Sequence[str] | None = None) -> int:
         else None
     )
     database = WildlifeDatabase()
+    enhancer: NightModeEnhancer | None = None
+    if args.night_mode == "on":
+        enhancer = NightModeEnhancer(enabled=True)
+    elif args.night_mode == "auto":
+        enhancer = NightModeEnhancer(auto=True)
+    elif args.night_mode == "off":
+        enhancer = NightModeEnhancer(enabled=False)
+
     try:
         frames_read = run_preview(
             camera,
@@ -286,6 +304,7 @@ def main(arguments: Sequence[str] | None = None) -> int:
             tracker=tracker,
             trigger=trigger,
             database=database,
+            enhancer=enhancer,
         )
     finally:
         database.close()
