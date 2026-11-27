@@ -58,6 +58,10 @@ class AudioPlayer:
         worker_path = Path(__file__).with_name("audio_worker.py")
         environment = os.environ.copy()
         environment["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
+        # Headless Linux / Raspberry Pi: tell SDL to use ALSA and a dummy video
+        # driver so pygame can initialise without a display (ignored on Windows).
+        environment.setdefault("SDL_AUDIODRIVER", "alsa")
+        environment.setdefault("SDL_VIDEODRIVER", "dummy")
         process = self._process_factory(
             [
                 sys.executable,

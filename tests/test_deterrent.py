@@ -42,9 +42,11 @@ def _confirmed(
 
 
 def test_deterrence_is_disabled_by_default(tmp_path: Path) -> None:
+    # Explicitly create a trigger with deterrence disabled to test the disabled path.
     audio = FakeAudioPlayer()
     trigger = DeterrentTrigger(
         audio,
+        enabled=False,
         default_sound_path=tmp_path / "warning.wav",
     )
 

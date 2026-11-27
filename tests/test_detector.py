@@ -58,8 +58,10 @@ def test_configured_targets_absent_from_model_are_reported(monkeypatch: pytest.M
 
 
 def test_default_priority_species_are_explicit() -> None:
-    assert config.TARGET_ANIMALS == frozenset(
-        {"wolf", "fox", "coyote", "wild boar"}
+    # Core wildlife threats must always be present; test/demo animals are also included.
+    core = {"wolf", "fox", "coyote", "wild boar"}
+    assert core.issubset(config.TARGET_ANIMALS), (
+        f"Core targets missing from config: {core - config.TARGET_ANIMALS}"
     )
 
 
